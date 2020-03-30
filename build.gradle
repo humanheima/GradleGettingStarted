@@ -1,0 +1,82 @@
+//apply CustomTasks.gradle
+
+plugins {
+    id 'java'
+}
+
+group 'com.dmw'
+version '1.0-SNAPSHOT'
+
+sourceCompatibility = 1.8
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    testCompile group: 'junit', name: 'junit', version: '4.12'
+}
+
+
+task helloWorld {
+    doLast {
+        println "Hello World!"
+    }
+}
+
+task myTask1 {
+    println "configure task1"
+}
+
+task myTask2 {
+    println "configure task2"
+}
+
+myTask1.doFirst {
+    println "task1 doFirst"
+}
+
+myTask1.doLast {
+    println "task1 doLast"
+}
+
+myTask2.doLast {
+    println "task2 doLast"
+}
+
+task myTask3 << {
+    println "doLast in task3, this is old task"
+}
+
+task myTask3(description: "这是task3的描述", group: "myTaskGroup", dependsOn: [myTask1, myTask2], overwrite: true) << {
+    println "doLast in task3, this is new task"
+}
+
+
+
+class SayHelloTask extends DefaultTask {
+
+    String msg = "default name"
+    int age = 18
+
+    @javax.inject.Inject
+    SayHelloTask(int age) {
+        this.age = age
+    }
+
+    //通过@TaskAction注解来标识该Task要执行的动作
+    @TaskAction
+    void sayHello() {
+        println "Hello $msg ! age is ${age}"
+    }
+}
+
+//通过constructorArgs参数来指定构造函数的参数值
+task hello1(type: SayHelloTask, constructorArgs: [30])
+
+//通过type参数指定task的父类，可以在配置代码里修改父类的属性
+task hello2(type: SayHelloTask, constructorArgs: [18]) {
+    //配置代码里修改 SayHelloTask 里的字段 msg 的值
+    msg = "hjy"
+}
+

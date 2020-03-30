@@ -1,0 +1,22 @@
+/**
+ * 自定义Task类，必须继承自DefaultTask
+ */
+class SayHelloTask extends DefaultTask {
+
+    String msg = "default name"
+    int age = 18
+
+    @javax.inject.Inject
+    SayHelloTask(int age) {
+        this.age = age
+    }
+
+    //通过@TaskAction注解来标识该Task要执行的动作
+    @TaskAction
+    void sayHello() {
+        println "Hello $msg ! age is ${age}"
+    }
+
+
+}
+
