@@ -1,8 +1,10 @@
 //apply CustomTasks.gradle
-
 plugins {
     id 'java'
 }
+
+//apply createTask.gradle
+
 
 group 'com.dmw'
 version '1.0-SNAPSHOT'
@@ -44,14 +46,13 @@ myTask2.doLast {
     println "task2 doLast"
 }
 
-task myTask3 << {
+task myTask3 {
     println "doLast in task3, this is old task"
 }
 
-task myTask3(description: "这是task3的描述", group: "myTaskGroup", dependsOn: [myTask1, myTask2], overwrite: true) << {
-    println "doLast in task3, this is new task"
+task myTask4(description: "这是task4的描述", group: "myTaskGroup", dependsOn: [myTask1, myTask2]) {
+    println "doLast in myTask4, this is new task"
 }
-
 
 
 class SayHelloTask extends DefaultTask {
@@ -79,4 +80,43 @@ task hello2(type: SayHelloTask, constructorArgs: [18]) {
     //配置代码里修改 SayHelloTask 里的字段 msg 的值
     msg = "hjy"
 }
+def myTask = task("firstTask")
+println(myTask.name)
+
+def secondTask = task("secondTask", new Action<Task>() {
+    @Override
+    void execute(Task task) {
+        task.setDescription("我是SecondTask，美滋滋")
+    }
+})
+println(secondTask.description)
+
+
+def thirdTask = task("thirdTask") {
+    task -> task.setDescription("我是thirdTask，美滋滋")
+}
+println(thirdTask.description)
+
+def map = [type: DefaultTask, overwrite: false, dependsOn: [secondTask, thirdTask]]
+map["description"] = "这是任务描述"
+map["group"] = "任务所在的组"
+
+def forthTask = task(map, "forthTask") {
+    println("forthTask 的闭包配置")
+}
+
+println(forthTask.description)
+println(forthTask.group)
+
+
+def mapReplace = [type: DefaultTask, overwrite: true, dependsOn: [secondTask, thirdTask]]
+mapReplace["description"] = "forthTaskReplaced的任务描述"
+mapReplace["group"] = "forthTaskReplace任务所在的组"
+
+def forthTaskReplace = task(mapReplace, "forthTask") {
+    println("forthTaskReplace 的闭包配置")
+}
+
+println(forthTaskReplace.description)
+println(forthTaskReplace.group)
 
