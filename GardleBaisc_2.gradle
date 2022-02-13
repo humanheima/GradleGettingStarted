@@ -1,0 +1,78 @@
+//apply from: 'SayHelloTask.gradle'
+
+task helloWorld {
+
+    //这是配置代码：这个代码在gradle配置阶段（ Configure project ）就会输出
+    println("Hello World! start ")
+
+    //在gradle执行阶段才会输出
+    doLast {
+        println("do last Hello World!")
+    }
+
+}
+
+
+/** Task Actions
+ * doFirst：task执行时最先执行的操作
+ * doLast：task执行时最后执行的操作
+ */
+
+task myTask1 {
+    println "configure task1"
+}
+
+task myTask2 {
+    println "configure task2"
+}
+
+myTask1.doFirst {
+    println "task1 doFirst"
+}
+
+myTask1.doLast {
+    println "task1 doLast"
+}
+
+myTask2.doLast {
+    println "task2 doLast"
+}
+
+
+task myTask3(description: "Task3的描述", group: "myTaskGroup", dependsOn: [myTask1, myTask2]) {
+
+    doLast {
+        println "doLast in task3, this is new task"
+    }
+}
+
+
+// 通过constructorArgs参数来指定构造函数的参数值，好像只能将 SayHelloTask 写在这个文件中才行。
+task hello1(type: SayHelloTask, constructorArgs: [30]) {
+
+    doLast {
+        println("current task name = $name")
+    }
+}
+
+class SayHelloTask extends DefaultTask {
+
+    String msg = "default name"
+    int age = 18
+
+    @javax.inject.Inject
+    SayHelloTask(int age) {
+        this.age = age
+    }
+
+    //通过@TaskAction注解来标识该Task要执行的动作
+    @TaskAction
+    void sayHello() {
+        println "Hello Say HelloTask $msg ! age is ${age}"
+    }
+
+
+}
+
+
+

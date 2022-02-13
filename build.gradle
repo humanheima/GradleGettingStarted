@@ -1,7 +1,21 @@
-//apply CustomTasks.gradle
+import java.util.function.Consumer
+
 plugins {
     id 'java'
+    id 'groovy'
 }
+
+
+//apply from: './GardleBaisc_2.gradle'
+//apply from: './GardleBaisc_3.gradle'
+apply from: './GardleBaisc_4.gradle'
+
+// 添加return，就不会执行后面的内容了，也就是只执行GardleBaisc_2.gradle的任务
+
+return
+
+apply from: './createTask.gradle'
+
 
 //apply createTask.gradle
 
@@ -19,104 +33,15 @@ dependencies {
     testCompile group: 'junit', name: 'junit', version: '4.12'
 }
 
+File bd = getBuildDir()
 
-task helloWorld {
-    doLast {
-        println "Hello World!"
-    }
-}
+println("开始输出所有的任务")
 
-task myTask1 {
-    println "configure task1"
-}
-
-task myTask2 {
-    println "configure task2"
-}
-
-myTask1.doFirst {
-    println "task1 doFirst"
-}
-
-myTask1.doLast {
-    println "task1 doLast"
-}
-
-myTask2.doLast {
-    println "task2 doLast"
-}
-
-task myTask3 {
-    println "doLast in task3, this is old task"
-}
-
-task myTask4(description: "这是task4的描述", group: "myTaskGroup", dependsOn: [myTask1, myTask2]) {
-    println "doLast in myTask4, this is new task"
-}
-
-
-class SayHelloTask extends DefaultTask {
-
-    String msg = "default name"
-    int age = 18
-
-    @javax.inject.Inject
-    SayHelloTask(int age) {
-        this.age = age
-    }
-
-    //通过@TaskAction注解来标识该Task要执行的动作
-    @TaskAction
-    void sayHello() {
-        println "Hello $msg ! age is ${age}"
-    }
-}
-
-//通过constructorArgs参数来指定构造函数的参数值
-task hello1(type: SayHelloTask, constructorArgs: [30])
-
-//通过type参数指定task的父类，可以在配置代码里修改父类的属性
-task hello2(type: SayHelloTask, constructorArgs: [18]) {
-    //配置代码里修改 SayHelloTask 里的字段 msg 的值
-    msg = "hjy"
-}
-def myTask = task("firstTask")
-println(myTask.name)
-
-def secondTask = task("secondTask", new Action<Task>() {
+tasks.forEach(new Consumer<Task>() {
     @Override
-    void execute(Task task) {
-        task.setDescription("我是SecondTask，美滋滋")
+    void accept(Task task) {
+        println("project.name = " + project.name + " task = ${task.name}")
     }
 })
-println(secondTask.description)
-
-
-def thirdTask = task("thirdTask") {
-    task -> task.setDescription("我是thirdTask，美滋滋")
-}
-println(thirdTask.description)
-
-def map = [type: DefaultTask, overwrite: false, dependsOn: [secondTask, thirdTask]]
-map["description"] = "这是任务描述"
-map["group"] = "任务所在的组"
-
-def forthTask = task(map, "forthTask") {
-    println("forthTask 的闭包配置")
-}
-
-println(forthTask.description)
-println(forthTask.group)
-
-
-def mapReplace = [type: DefaultTask, overwrite: true, dependsOn: [secondTask, thirdTask]]
-mapReplace["description"] = "forthTaskReplaced的任务描述"
-mapReplace["group"] = "forthTaskReplace任务所在的组"
-
-def forthTaskReplace = task(mapReplace, "forthTask") {
-    println("forthTaskReplace 的闭包配置")
-}
-
-println(forthTaskReplace.description)
-println(forthTaskReplace.group)
+println("输出所有的任务结束")
 
