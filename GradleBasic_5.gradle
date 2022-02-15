@@ -1,0 +1,187 @@
+/**
+ * 参考链接：https://www.jianshu.com/p/58d86b4c0ee5
+ */
+//先定义一个普通的java类，包含2个属性
+class Foo {
+    int age
+    String username
+
+    String toString() {
+        return "name = ${username}, age = ${age}"
+    }
+}
+//创建一个名为 foo 的Extension
+getExtensions().create("foo", Foo)
+
+//配置Extension
+foo {
+    age = 30
+    username = "hjy"
+}
+
+task testExt {
+    doLast {
+        //能直接通过 project 获取到自定义的 Extension
+        println project.foo
+    }
+}
+
+//父类
+class Animal {
+
+    String username
+    int legs
+
+    Animal(String name) {
+        username = name
+    }
+
+    void setLegs(int c) {
+        legs = c
+    }
+
+    String toString() {
+        return "This animal is $username, it has ${legs} legs."
+    }
+}
+
+//子类
+class Pig extends Animal {
+
+    int age
+    String owner
+
+    Pig(int age, String owner) {
+        super("Pig")
+        this.age = age
+        this.owner = owner
+    }
+
+    String toString() {
+        return super.toString() + " Its age is $age, its owner is $owner."
+    }
+
+}
+
+//创建的Extension是 Animal 类型
+Animal aAnimal = getExtensions().create(Animal, "animal", Pig, 3, "hjy")
+//创建的Extension是 Pig 类型
+Pig aPig = getExtensions().create("pig", Pig, 5, "kobe")
+
+animal {
+    legs = 4    //配置属性
+}
+
+pig {
+    setLegs 2   //这个是方法调用，也就是 setLegs(2)
+}
+
+task testExt2 {
+    doLast {
+        println aAnimal
+        println aPig
+        //验证 aPig 对象是 ExtensionAware 类型的
+        println "aPig is a instance of ExtensionAware : ${aPig instanceof ExtensionAware}"
+    }
+}
+
+/**
+ * ExtensionContainer 的 add方法。
+ */
+getExtensions().add(Pig, "mypig", new Pig(5, "kobe"))
+
+mypig {
+    username = "MyPig"
+    legs = 4
+    age = 1
+}
+task testExt3 {
+    doLast {
+        def aPig2 = project.getExtensions().getByName("mypig")
+        println aPig2
+    }
+}
+
+
+/**
+ *  嵌套Extension
+ */
+
+class OuterExt {
+
+    String outerName
+    String msg
+    InnerExt innerExt = new InnerExt()
+
+    void outerName(String name) {
+        outerName = name
+    }
+
+    void msg(String msg) {
+        this.msg = msg
+    }
+
+    //创建内部Extension，名称为方法名 inner
+    void inner(Action<InnerExt> action) {
+        println("OuterExt 执行 inner Action")
+        action.execute(inner)
+    }
+
+    //创建内部Extension，名称为方法名 inner
+    void inner(Closure c) {
+        println("OuterExt 执行 inner Closure")
+        org.gradle.util.ConfigureUtil.configure(c, innerExt)
+    }
+
+    String toString() {
+        return "OuterExt[ name = ${outerName}, msg = ${msg}] " + innerExt
+    }
+
+}
+
+class InnerExt {
+
+    String innerName
+    String msg
+
+    void innerName(String name) {
+        innerName = name
+    }
+
+    void msg(String msg) {
+        this.msg = msg
+    }
+
+    String toString() {
+        return "InnerExt[ name = ${innerName}, msg = ${msg}]"
+    }
+
+}
+
+def outExt = getExtensions().create("outer", OuterExt)
+
+outer {
+
+    outerName "outer"
+    msg "this is a outer message."
+
+//    inner(new Action<InnerExt>() {
+//        @Override
+//        void execute(InnerExt innerExt) {
+//            innerExt.innerName("inner action")
+//            innerExt.msg("msg action")
+//        }
+//    })
+
+    inner {
+        innerName "inner"
+        msg "This is a inner message."
+    }
+
+}
+
+task testExt4 {
+    doLast {
+        println outExt
+    }
+}

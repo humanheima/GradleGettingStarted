@@ -3,19 +3,19 @@ import java.util.function.Consumer
 plugins {
     id 'java'
     id 'groovy'
+    id 'maven'
 }
 
 
 //apply from: './GardleBaisc_2.gradle'
 //apply from: './GardleBaisc_3.gradle'
-apply from: './GardleBaisc_4.gradle'
+//apply from: './GardleBaisc_4.gradle'
+//apply from: './GradleBasic_5.gradle'
+apply from: './GradleBasic_6.gradle'
 
 // 添加return，就不会执行后面的内容了，也就是只执行GardleBaisc_2.gradle的任务
 
 return
-
-apply from: './createTask.gradle'
-
 
 //apply createTask.gradle
 
@@ -28,12 +28,6 @@ sourceCompatibility = 1.8
 repositories {
     mavenCentral()
 }
-
-dependencies {
-    testCompile group: 'junit', name: 'junit', version: '4.12'
-}
-
-File bd = getBuildDir()
 
 println("开始输出所有的任务")
 

@@ -1,4 +1,0 @@
-def thirdTask = task("thirdTask") {
-    task -> task.setDescription("我是thirdTask，美滋滋")
-}
-println(thirdTask.description)
